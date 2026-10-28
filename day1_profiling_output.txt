@@ -1,0 +1,246 @@
+
+==============================================================================
+1. FILE AND SHAPE
+==============================================================================
+Source          : archive.zip -> indian_banking_transactions.csv
+SHA-256 (input) : c11e7924d2bc5f89f59f1fa39d23403ef16c8319898fb06c12b158f3fd4261c1
+Rows            : 550,000
+Columns         : 20
+Column names    : transaction_id, customer_id, transaction_date, transaction_time, account_type, transaction_type, transaction_amount, transaction_direction, account_balance, merchant_category, state, credit_score, has_loan, loan_type, emi_amount, transaction_status, channel, kyc_status, is_fraud, transaction_hour
+
+==============================================================================
+2. DATA TYPES, MISSING VALUES, DISTINCT COUNTS
+==============================================================================
+                      pandas_dtype  missing  distinct
+transaction_id                 str        0    550000
+customer_id                    str        0     79916
+transaction_date               str        0      1827
+transaction_time               str        0      1440
+account_type                   str        0         5
+transaction_type               str        0        10
+transaction_amount         float64        0    374552
+transaction_direction          str        0         2
+account_balance            float64        0    536170
+merchant_category              str        0        15
+state                          str        0        10
+credit_score                 int64        0       600
+has_loan                     int64        0         2
+loan_type                      str        0         7
+emi_amount                 float64        0    177524
+transaction_status             str        0         4
+channel                        str        0         6
+kyc_status                     str        0         3
+is_fraud                     int64        0         2
+transaction_hour             int64        0        24
+
+==============================================================================
+3. DUPLICATES
+==============================================================================
+Exact duplicate rows                     : 0
+Duplicate transaction_id values          : 0
+Duplicates ignoring transaction_id       : 0
+Distinct customer_id values              : 79,916
+Transactions per customer_id (min/median/max): 1 / 7 / 20
+
+==============================================================================
+4. DATE COVERAGE
+==============================================================================
+Unparseable dates : 0
+Minimum date      : 2019-01-01
+Maximum date      : 2024-01-01
+Distinct dates    : 1,827
+Rows per year:
+transaction_date
+2019    110083
+2020    109767
+2021    110024
+2022    110247
+2023    109584
+2024       295
+Rows on the last date (2024-01-01): 295
+
+==============================================================================
+5. NUMERIC COLUMNS
+==============================================================================
+                       count      mean        std    min       1%       5%       25%       50%       75%        95%        99%          max
+transaction_amount  550000.0  29907.09  139610.10    2.4    71.19   186.03    763.04   2035.74   8557.50  140856.62  530534.67  10000000.00
+account_balance     550000.0  84550.12  170914.59  500.0  1766.10  4289.96  15157.78  36422.87  87607.04  309156.79  746756.57   5000000.00
+credit_score        550000.0    599.81     173.05  300.0   305.00   330.00    450.00    600.00    750.00     870.00     893.00       899.00
+emi_amount          550000.0   2365.86    4973.55    0.0     0.00     0.00      0.00      0.00   3115.03   11554.15   22488.37    153325.74
+transaction_hour    550000.0     11.50       6.92    0.0     0.00     1.00      6.00     11.00     17.00      22.00      23.00        23.00
+
+transaction_amount <= 0 : 0
+transaction_amount == max (10,000,000.00) : 4
+account_balance == min (500.00) : 288
+account_balance == max (5,000,000.00) : 38
+Most frequent transaction_amount values (round-number clustering):
+transaction_amount
+1000.0    16542
+2000.0    13938
+500.0      8216
+5000.0     8146
+3000.0     5482
+
+==============================================================================
+6. CATEGORY DISTRIBUTIONS
+==============================================================================
+
+-- account_type (5 values)
+                 rows    pct
+account_type                
+Savings        219651  39.94
+Current        137648  25.03
+Salary         110067  20.01
+NRI             43746   7.95
+Fixed Deposit   38888   7.07
+
+-- transaction_type (10 values)
+                    rows    pct
+transaction_type               
+UPI               153986  28.00
+IMPS               77038  14.01
+NEFT               66615  12.11
+POS                60278  10.96
+ATM_Withdrawal     55106  10.02
+Net_Banking        38458   6.99
+RTGS               32964   5.99
+Auto_Debit         27418   4.99
+Cheque             21711   3.95
+Credit_Card        16426   2.99
+
+-- transaction_direction (2 values)
+                         rows    pct
+transaction_direction               
+Debit                  370394  67.34
+Credit                 179606  32.66
+
+-- merchant_category (15 values)
+                    rows    pct
+merchant_category              
+Retail             66180  12.03
+Food & Dining      54776   9.96
+E-Commerce         54767   9.96
+Travel             44177   8.03
+Salary             43937   7.99
+Peer Transfer      38753   7.05
+Utilities          38575   7.01
+Healthcare         33015   6.00
+Entertainment      32997   6.00
+Government         27508   5.00
+Investment         27380   4.98
+Education          27359   4.97
+Insurance          22020   4.00
+Fuel               21929   3.99
+Real Estate        16627   3.02
+
+-- state (10 values)
+              rows    pct
+state                    
+Maharashtra  98911  17.98
+Karnataka    76659  13.94
+Tamil Nadu   71747  13.04
+Delhi        66114  12.02
+Gujarat      54798   9.96
+Telangana    49610   9.02
+West Bengal  43950   7.99
+Rajasthan    38725   7.04
+UP           27414   4.98
+Punjab       22072   4.01
+
+-- has_loan (2 values)
+            rows    pct
+has_loan               
+0         357712  65.04
+1         192288  34.96
+
+-- loan_type (7 values)
+             rows    pct
+loan_type               
+None       377134  68.57
+Personal    47810   8.69
+Home        38252   6.95
+Auto        29219   5.31
+Business    28863   5.25
+Education   19074   3.47
+Gold         9648   1.75
+
+-- transaction_status (4 values)
+                      rows    pct
+transaction_status               
+Success             506247  92.04
+Failed               21905   3.98
+Reversed             11019   2.00
+Pending              10829   1.97
+
+-- channel (6 values)
+                rows    pct
+channel                    
+Mobile_App    208368  37.89
+Web           121010  22.00
+ATM            66177  12.03
+POS_Terminal   60853  11.06
+Branch         54957   9.99
+API            38635   7.02
+
+-- kyc_status (3 values)
+              rows    pct
+kyc_status               
+Verified    483457  87.90
+Pending      44288   8.05
+Expired      22255   4.05
+
+-- is_fraud (2 values)
+            rows    pct
+is_fraud               
+0         545127  99.11
+1           4873   0.89
+
+==============================================================================
+7. FRAUD LABEL (is_fraud is a SUPPLIED LABEL, not confirmed fraud)
+==============================================================================
+is_fraud = 1 : 4,873   rate = 0.8860%
+transaction_amount summary by label:
+             count       mean        std   min     25%      50%       75%          max
+is_fraud                                                                              
+0         545127.0   29106.69  135379.52  2.40  762.08  2030.99   8508.70  10000000.00
+1           4873.0  119446.21  376261.47  8.65  895.84  2691.95  19189.24   6751663.36
+
+-- label rate by channel
+                rows  labelled  rate_pct
+channel                                 
+Branch         54957       520     0.946
+POS_Terminal   60853       557     0.915
+API            38635       346     0.896
+Web           121010      1080     0.892
+Mobile_App    208368      1809     0.868
+ATM            66177       561     0.848
+
+-- label rate by transaction_type
+                    rows  labelled  rate_pct
+transaction_type                            
+RTGS               32964       611     1.854
+Cheque             21711       256     1.179
+NEFT               66615       581     0.872
+Credit_Card        16426       140     0.852
+Net_Banking        38458       326     0.848
+ATM_Withdrawal     55106       456     0.827
+IMPS               77038       624     0.810
+POS                60278       481     0.798
+UPI               153986      1211     0.786
+Auto_Debit         27418       187     0.682
+
+==============================================================================
+8. HAS_LOAN vs LOAN_TYPE vs EMI_AMOUNT
+==============================================================================
+has_loan x (loan_type == 'None'):
+loan_type is 'None'   False    True     All
+has_loan                                   
+0                         0  357712  357712
+1                    172866   19422  192288
+All                  172866  377134  550000
+
+Rows with has_loan=1 AND loan_type='None' : 19,422 (3.53% of all rows; 10.10% of has_loan=1 rows)
+  ...of which emi_amount > 0 : 19,422
+Rows with has_loan=0 AND loan_type<>'None' : 0
+Rows with has_loan=0 AND emi_amount>0      : 0
+Rows with has_loan=1 AND emi_amount=0      : 0

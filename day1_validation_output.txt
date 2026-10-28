@@ -1,0 +1,76 @@
+DATA VALIDATION REPORT
+------------------------------------------------------------------------------
+[PASS  ] S01                Columns match the 20 expected names in order
+[PASS  ] S02                Row count equals expected value (550,000)
+                           -> found 550,000
+[PASS  ] S03                Row count recorded
+                           -> 550,000 rows
+[PASS  ] S04                No empty (missing) cells in any column
+                           -> 0 empty cells
+[PASS  ] K01                transaction_id is unique
+                           -> 0 duplicates
+[PASS  ] K02                transaction_id format TXN + 9 digits
+                           -> 0 bad
+[PASS  ] K03                customer_id format CUST + 6 digits
+                           -> 0 bad
+[PASS  ] K04                No exact duplicate rows
+                           -> 0 duplicates
+[PASS  ] K05                No duplicate rows when transaction_id is ignored (hidden duplicates)
+                           -> 0
+[PASS  ] D01                transaction_date parses as YYYY-MM-DD
+                           -> 0 bad
+[PASS  ] D02                Date range recorded
+                           -> 2019-01-01 to 2024-01-01
+[PASS  ] D03                transaction_time is a valid HH:MM
+                           -> 0 bad
+[PASS  ] D04                transaction_hour equals the hour part of transaction_time
+                           -> 0 mismatches
+[PASS  ] D07                Every calendar day between min and max date has at least one transaction
+                           -> 1,827 distinct dates of 1,827 calendar days (0 missing)
+[REVIEW] D05                Final calendar year is complete (otherwise exclude from year-over-year comparisons)
+                           -> 2024 has 1 distinct date(s) and 295 rows
+[PASS  ] D06                File is sorted by transaction_date
+[PASS  ] V-account_type     account_type contains only the 5 observed/allowed values
+[PASS  ] V-transaction_type transaction_type contains only the 10 observed/allowed values
+[PASS  ] V-transaction_direction transaction_direction contains only the 2 observed/allowed values
+[PASS  ] V-transaction_status transaction_status contains only the 4 observed/allowed values
+[PASS  ] V-channel          channel contains only the 6 observed/allowed values
+[PASS  ] V-kyc_status       kyc_status contains only the 3 observed/allowed values
+[PASS  ] V-loan_type        loan_type contains only the 7 observed/allowed values
+[PASS  ] V-has_loan         has_loan contains only the 2 observed/allowed values
+[PASS  ] V-is_fraud         is_fraud contains only the 2 observed/allowed values
+[PASS  ] V-credit_score     credit_score within 300-900 (typical Indian bureau scale; assumption)
+                           -> 0 outside; observed 300-899
+[PASS  ] V-amount_positive  transaction_amount > 0
+                           -> 0
+[PASS  ] V-balance_nonneg   account_balance >= 0
+                           -> 0
+[PASS  ] V-emi_nonneg       emi_amount >= 0
+                           -> 0
+[PASS  ] X01                has_loan=0 implies loan_type='None'
+                           -> 0 violations
+[PASS  ] X02                has_loan=0 implies emi_amount=0
+                           -> 0 violations
+[REVIEW] X03                has_loan=1 implies a named loan_type
+                           -> 19,422 rows (3.53%) have has_loan=1 and loan_type='None'; all have emi_amount>0. Meaning of 'None' for a borrower is undocumented (unspecified type? data defect?)
+[PASS  ] X04                has_loan=1 implies emi_amount>0
+                           -> 0
+[REVIEW] P01                Maximum transaction_amount is not repeated (possible clipping / ceiling)
+                           -> max 10,000,000.00 appears 4 times
+[REVIEW] P02                account_balance min/max are not repeated (possible floor/ceiling)
+                           -> min 500.00 x288; max 5,000,000.00 x38
+[REVIEW] P03                transaction_amount does not exceed account_balance
+                           -> 79,494 rows (14.5%); balance timing (before/after) is undocumented
+[REVIEW] P04                merchant_category='Salary' rows are credits
+                           -> 29,402 of 43,937 Salary rows (66.9%) are Debits
+[REVIEW] P05                Round-number amounts are not heavily over-represented
+                           -> top amounts: 1,000 x16,542, 2,000 x13,938, 500 x8,216, 5,000 x8,146, 3,000 x5,482
+[REVIEW] P06                Customer-level attributes are constant within a customer_id
+                           -> customers (of 79,916) with >1 value: state=78,998, account_type=77,937, credit_score=79,334, kyc_status=45,037, has_loan=71,922. customer_id behaves like a row-level label, not a stable customer profile
+[PASS  ] P07                Customers with exactly one transaction (information only)
+                           -> 579
+[PASS  ] P08                is_fraud prevalence recorded (supplied label, not confirmed fraud)
+                           -> 4,873 labelled = 0.886%
+------------------------------------------------------------------------------
+SUMMARY: 33 PASS, 8 REVIEW, 0 FAIL
+REVIEW items are data-definition questions; no rows were changed or removed.
