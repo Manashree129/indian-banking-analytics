@@ -4,11 +4,11 @@ Source file: `indian_banking_transactions.csv` (550,000 rows, 20 columns). All p
 
 **How to read this document.** No publisher documentation was found (see `source_and_provenance.md`). The "Meaning" column is therefore an interpretation based on column names and observed values. Where a meaning is uncertain it is marked **Assumed** or **Undocumented**. Nothing here comes from the publisher.
 
-Raw values are stored as text in the CSV. "Suggested PostgreSQL type" is a Day 2 design proposal, not a decision yet.
+Raw values are stored as text in the CSV. The "PostgreSQL type" column shows the design used in `sql/01_schema_and_load.sql` for `banking.transactions`; the script has been written but not yet executed on a server.
 
 ## Columns
 
-| # | Column | Observed type | Suggested PostgreSQL type | Distinct | Missing | Meaning (status) | Observed values / range |
+| # | Column | Observed type | PostgreSQL type (as designed in `sql/01_schema_and_load.sql`) | Distinct | Missing | Meaning (status) | Observed values / range |
 |---|---|---|---|---|---|---|---|
 | 1 | `transaction_id` | text | `VARCHAR(12)` PRIMARY KEY | 550,000 | 0 | Unique transaction identifier (Verified unique) | `TXN000000001` to `TXN000550000`, no gaps |
 | 2 | `customer_id` | text | `VARCHAR(10)` | 79,916 | 0 | Customer identifier (**Assumed**; see note 1) | `CUST` + 6 digits; 1 to 20 rows per ID, median 7 |
@@ -40,9 +40,9 @@ Raw values are stored as text in the CSV. "Suggested PostgreSQL type" is a Day 2
 
 **Note 2 - the text `None` in `loan_type`.** The CSV contains the five-character text `None`, not an empty cell. Pandas, Power Query and some database loaders can convert it to a missing value. In this project:
 
-- Python reads with `keep_default_na=False`.
-- Day 2 PostgreSQL loading must keep `'None'` as text and not convert it to NULL (to be decided and documented in `01_schema_and_load.sql`).
-- Power Query must treat it as a value, not as null.
+- Python reads the CSV with `keep_default_na=False` to preserve the literal text `None`.
+- PostgreSQL: `sql/01_schema_and_load.sql` was executed successfully. The typed table contains 550,000 rows, and validation confirmed that `loan_type` contains 377,134 literal `None` values and zero SQL NULLs.
+- Power Query should preserve `None` as a text value rather than automatically converting it to null.
 
 **Note 3 - `has_loan`, `loan_type` and `emi_amount`.**
 
@@ -62,6 +62,6 @@ These do not exist in the CSV. They will be created in SQL or Power Query and cl
 
 | Planned field | Definition | Day |
 |---|---|---|
-| `transaction_ts` | `transaction_date + transaction_time` as a timestamp | 2 |
+| `transaction_ts` | `transaction_date + transaction_time` as a timestamp (will be exposed in a view, not stored in the table) | 3 |
 | `amount_band` | Banded `transaction_amount` (band edges to be set after distribution review) | 3 |
 | `loan_type_clean` | `loan_type` with the 19,422 exception rows labelled "Loan - type not recorded" (original column preserved) | 3-4 |
