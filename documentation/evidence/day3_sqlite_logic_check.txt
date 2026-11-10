@@ -1,0 +1,509 @@
+SQLITE LOGIC CROSS-CHECK (not a PostgreSQL execution)
+==============================================================================
+02_data_quality_checks.sql statement 1: OK (no result set)
+02_data_quality_checks.sql statement 2: OK, 72 row(s)
+check_id          area                                          check_name  python_value  postgres_value  difference result
+     R01    1 Raw load                        Rows in raw_transactions_raw      550000.0        550000.0         0.0  MATCH
+     R02    1 Raw load                Distinct transaction_id in raw table      550000.0        550000.0         0.0  MATCH
+     R03    1 Raw load                Raw rows with any NULL or empty cell           0.0             0.0         0.0  MATCH
+     R04    1 Raw load Raw rows with leading/trailing spaces in any column           0.0             0.0         0.0  MATCH
+     R05    1 Raw load               Raw transaction_id not TXN + 9 digits           0.0             0.0         0.0  MATCH
+     R06    1 Raw load                 Raw customer_id not CUST + 6 digits           0.0             0.0         0.0  MATCH
+     R07    1 Raw load        Raw loan_type equal to the literal text None      377134.0        377134.0         0.0  MATCH
+     T01 2 Typed table                        Rows in banking_transactions      550000.0        550000.0         0.0  MATCH
+... 72 rows
+02_data_quality_checks.sql statement 3: OK, 1 row(s)
+result  checks
+ MATCH      72
+02_data_quality_checks.sql statement 4: OK, 2 row(s)
+check_id             check_name python_value postgres_value result
+     D11 First transaction_date   2019-01-01     2019-01-01  MATCH
+     D12  Last transaction_date   2024-01-01     2024-01-01  MATCH
+02_data_quality_checks.sql statement 5: OK, 10 row(s)
+transaction_id customer_id transaction_date account_type  has_loan loan_type  emi_amount
+  TXN000000041  CUST023898       2019-01-01      Savings         1      None     8597.49
+  TXN000000042  CUST068149       2019-01-01       Salary         1      None     6697.80
+  TXN000000069  CUST009269       2019-01-01      Current         1      None     5683.47
+  TXN000000073  CUST008572       2019-01-01      Savings         1      None     8317.18
+  TXN000000110  CUST052993       2019-01-01      Current         1      None     6982.45
+  TXN000000150  CUST021960       2019-01-01       Salary         1      None     4558.20
+  TXN000000194  CUST072083       2019-01-01      Current         1      None    10510.49
+  TXN000000239  CUST038361       2019-01-01      Savings         1      None     3790.34
+  TXN000000257  CUST040819       2019-01-01          NRI         1      None     4139.92
+  TXN000000317  CUST054749       2019-01-02      Current         1      None     2268.92
+02_data_quality_checks.sql statement 6: OK, 4 row(s)
+transaction_id transaction_date transaction_type    channel  transaction_amount  account_balance transaction_status  is_fraud
+  TXN000371878       2022-05-21             NEFT Mobile_App          10000000.0         21776.31            Success         0
+  TXN000386303       2022-07-07           Cheque Mobile_App          10000000.0         42180.76            Success         0
+  TXN000526797       2023-10-16           Cheque        Web          10000000.0         80694.61            Success         0
+  TXN000532758       2023-11-05           Cheque Mobile_App          10000000.0         12230.57            Success         0
+02_data_quality_checks.sql statement 7: SKIPPED (PG-only)
+02_data_quality_checks.sql statement 8: SKIPPED (PG-only)
+02_data_quality_checks.sql statement 9: SKIPPED (PG-only)
+-- 02_data_quality_checks.sql: 6 ran, 3 skipped (PG-only), 0 error(s)
+RECONCILIATION SUMMARY: MATCH=72
+==============================================================================
+03_exploratory_analysis.sql statement 1: OK, 1 row(s)
+ transactions  distinct_transaction_ids  distinct_customer_ids first_date  last_date  distinct_dates  total_amount  avg_amount  fraud_labelled  fraud_label_rate_pct
+       550000                    550000                  79916 2019-01-01 2024-01-01            1827  1.644890e+10    29907.09            4873                 0.886
+03_exploratory_analysis.sql statement 2: OK, 6 row(s)
+calendar_year  transactions  total_amount  fraud_labelled  fraud_rate_pct  days_covered
+         2019        110083  3.258465e+09             968           0.879           365
+         2020        109767  3.315647e+09             972           0.886           366
+         2021        110024  3.253235e+09             990           0.900           365
+         2022        110247  3.344988e+09             960           0.871           365
+         2023        109584  3.265949e+09             981           0.895           365
+         2024           295  1.061643e+07               2           0.678             1
+03_exploratory_analysis.sql statement 3: OK, 4 row(s)
+transaction_status  transactions  pct_of_transactions  attempted_amount
+           Success        506247                92.04      1.509180e+10
+            Failed         21905                 3.98      6.968504e+08
+          Reversed         11019                 2.00      3.257559e+08
+           Pending         10829                 1.97      3.344983e+08
+03_exploratory_analysis.sql statement 4: OK, 6 row(s)
+     channel  transactions  pct_of_transactions  total_amount  avg_amount  fraud_labelled  fraud_rate_pct  failed_pct
+  Mobile_App        208368                37.89  6.244031e+09    29966.36            1809           0.868        3.94
+         Web        121010                22.00  3.661956e+09    30261.60            1080           0.892        3.93
+         ATM         66177                12.03  1.960455e+09    29624.41             561           0.848        4.03
+POS_Terminal         60853                11.06  1.807224e+09    29698.19             557           0.915        4.03
+      Branch         54957                 9.99  1.606088e+09    29224.44             520           0.946        4.12
+         API         38635                 7.02  1.169149e+09    30261.39             346           0.896        4.05
+03_exploratory_analysis.sql statement 5: OK, 10 row(s)
+transaction_type  transactions  pct_of_transactions  total_amount  avg_amount  fraud_labelled  fraud_rate_pct  failed_pct
+             UPI        153986                28.00  2.092383e+08     1358.81            1211           0.786        3.96
+            IMPS         77038                14.01  5.407691e+08     7019.51             624           0.810        3.99
+            NEFT         66615                12.11  2.762128e+09    41464.05             581           0.872        3.93
+             POS         60278                10.96  1.203425e+08     1996.46             481           0.798        4.03
+  ATM_Withdrawal         55106                10.02  1.335500e+08     2423.51             456           0.827        3.87
+     Net_Banking         38458                 6.99  8.198261e+08    21317.44             326           0.848        4.07
+            RTGS         32964                 5.99  8.875703e+09   269254.41             611           1.854        4.21
+      Auto_Debit         27418                 4.99  7.415138e+07     2704.48             187           0.682        3.95
+          Cheque         21711                 3.95  2.830290e+09   130362.01             256           1.179        3.93
+     Credit_Card         16426                 2.99  8.290444e+07     5047.15             140           0.852        4.05
+03_exploratory_analysis.sql statement 6: OK, 15 row(s)
+merchant_category  transactions  pct_of_transactions  total_amount  avg_amount
+           Retail         66180                12.03  2.004895e+09    30294.57
+    Food & Dining         54776                 9.96  1.650395e+09    30129.89
+       E-Commerce         54767                 9.96  1.618021e+09    29543.71
+           Travel         44177                 8.03  1.308025e+09    29608.73
+           Salary         43937                 7.99  1.332665e+09    30331.28
+    Peer Transfer         38753                 7.05  1.156195e+09    29834.98
+        Utilities         38575                 7.01  1.127987e+09    29241.41
+       Healthcare         33015                 6.00  9.752505e+08    29539.62
+    Entertainment         32997                 6.00  9.745293e+08    29533.88
+       Government         27508                 5.00  8.074440e+08    29353.06
+       Investment         27380                 4.98  8.474247e+08    30950.50
+        Education         27359                 4.97  8.163123e+08    29837.07
+        Insurance         22020                 4.00  6.296330e+08    28593.69
+             Fuel         21929                 3.99  6.972416e+08    31795.41
+      Real Estate         16627                 3.02  5.028831e+08    30244.97
+03_exploratory_analysis.sql statement 7: OK, 10 row(s)
+      state  transactions  pct_of_transactions  total_amount  fraud_labelled  fraud_rate_pct
+Maharashtra         98911                17.98  2.980265e+09             885           0.895
+  Karnataka         76659                13.94  2.256632e+09             701           0.914
+ Tamil Nadu         71747                13.04  2.148852e+09             633           0.882
+      Delhi         66114                12.02  1.981774e+09             588           0.889
+    Gujarat         54798                 9.96  1.682205e+09             482           0.880
+  Telangana         49610                 9.02  1.426830e+09             440           0.887
+West Bengal         43950                 7.99  1.315251e+09             413           0.940
+  Rajasthan         38725                 7.04  1.170165e+09             303           0.782
+         UP         27414                 4.98  8.399960e+08             260           0.948
+     Punjab         22072                 4.01  6.469321e+08             168           0.761
+03_exploratory_analysis.sql statement 8: OK, 5 row(s)
+ account_type  transactions  debit_transactions  credit_transactions  debit_amount  credit_amount  debit_share_pct
+      Savings        219651              148252                71399  3.488809e+09   3.022785e+09            67.49
+      Current        137648               92410                45238  2.217999e+09   1.895550e+09            67.14
+       Salary        110067               73843                36224  1.740735e+09   1.570264e+09            67.09
+          NRI         43746               29667                14079  7.042541e+08   6.357035e+08            67.82
+Fixed Deposit         38888               26222                12666  6.413500e+08   5.314527e+08            67.43
+03_exploratory_analysis.sql statement 9: OK, 7 row(s)
+         amount_band  transactions  pct_of_transactions  fraud_labelled  fraud_rate_pct
+         1 under 500         89097                16.20             709           0.796
+        2 500-999.99         77129                14.02             597           0.774
+    3 1,000-4,999.99        199671                36.30            1642           0.822
+   4 5,000-24,999.99        103959                18.90             814           0.783
+  5 25,000-99,999.99         44065                 8.01             355           0.806
+6 100,000-999,999.99         34333                 6.24             612           1.783
+7 1,000,000 and over          1746                 0.32             144           8.247
+03_exploratory_analysis.sql statement 10: SKIPPED (PG-only)
+03_exploratory_analysis.sql statement 11: SKIPPED (PG-only)
+03_exploratory_analysis.sql statement 12: OK, 15 row(s)
+merchant_category  transactions  fraud_labelled  fraud_rate_pct  overall_rate_pct
+    Peer Transfer         38753             362           0.934             0.886
+       Investment         27380             252           0.920             0.886
+             Fuel         21929             201           0.917             0.886
+       E-Commerce         54767             502           0.917             0.886
+       Healthcare         33015             300           0.909             0.886
+    Entertainment         32997             300           0.909             0.886
+           Salary         43937             396           0.901             0.886
+           Retail         66180             594           0.898             0.886
+           Travel         44177             388           0.878             0.886
+        Insurance         22020             191           0.867             0.886
+        Education         27359             236           0.863             0.886
+      Real Estate         16627             143           0.860             0.886
+    Food & Dining         54776             471           0.860             0.886
+        Utilities         38575             323           0.837             0.886
+       Government         27508             214           0.778             0.886
+03_exploratory_analysis.sql statement 13: OK, 24 row(s)
+ transaction_hour  transactions  pct_of_transactions  fraud_rate_pct
+                0         22928                 4.17           0.946
+                1         23017                 4.18           0.791
+                2         22740                 4.13           0.844
+                3         22886                 4.16           0.922
+                4         23082                 4.20           0.875
+                5         22514                 4.09           0.857
+                6         22931                 4.17           0.929
+                7         22982                 4.18           0.949
+                8         23242                 4.23           0.848
+                9         22659                 4.12           0.891
+               10         23111                 4.20           1.008
+               11         23062                 4.19           0.850
+               12         22891                 4.16           0.865
+               13         22700                 4.13           0.793
+               14         22790                 4.14           0.917
+               15         23054                 4.19           0.941
+               16         22993                 4.18           0.939
+               17         22966                 4.18           0.866
+               18         22576                 4.10           0.881
+               19         22830                 4.15           0.894
+               20         23075                 4.20           0.789
+               21         22847                 4.15           0.941
+               22         22984                 4.18           0.835
+               23         23140                 4.21           0.890
+03_exploratory_analysis.sql statement 14: OK, 60 row(s)
+year_month  transactions  total_amount
+   2019-01          9406  249535891.79
+   2019-02          8220  243173588.54
+   2019-03          9290  260628647.43
+   2019-04          8990  273646411.65
+   2019-05          9425  274372666.32
+   2019-06          9107  265974301.92
+   2019-07          9400  295934783.83
+   2019-08          9524  316574899.38
+... 60 rows
+03_exploratory_analysis.sql statement 15: OK, 6 row(s)
+calendar_year  borrower_rows  type_not_recorded  pct_of_borrower_rows
+         2019          38631               3915                 10.13
+         2020          38401               3834                  9.98
+         2021          38154               3921                 10.28
+         2022          38346               3898                 10.17
+         2023          38656               3842                  9.94
+         2024            100                 12                 12.00
+03_exploratory_analysis.sql statement 16: OK, 7 row(s)
+loan_type  transactions  has_loan_1  has_loan_0  avg_emi_where_positive
+     None        377134       19422      357712                 6697.62
+ Personal         47810       47810           0                 6789.41
+     Home         38252       38252           0                 6756.46
+     Auto         29219       29219           0                 6780.03
+ Business         28863       28863           0                 6764.13
+Education         19074       19074           0                 6765.95
+     Gold          9648        9648           0                 6809.63
+03_exploratory_analysis.sql statement 17: OK, 3 row(s)
+kyc_status  transactions  success_pct  failed_pct  reversed_pct  pending_pct
+  Verified        483457        92.05        3.98          2.00         1.97
+   Pending         44288        92.12        4.05          1.93         1.89
+   Expired         22255        91.80        3.88          2.25         2.08
+03_exploratory_analysis.sql statement 18: OK, 20 row(s)
+ transactions_per_customer_id  customer_ids
+                            1           579
+                            2          1962
+                            3          4326
+                            4          7731
+                            5         10570
+                            6         12233
+                            7         11941
+                            8         10249
+                            9          7784
+                           10          5408
+                           11          3301
+                           12          1944
+                           13          1040
+                           14           478
+                           15           228
+                           16            82
+                           17            39
+                           18            15
+                           19             4
+                           20             2
+03_exploratory_analysis.sql statement 19: OK, 10 row(s)
+transaction_id transaction_date transaction_type      channel transaction_direction  transaction_amount  account_balance transaction_status  is_fraud
+  TXN000371878       2022-05-21             NEFT   Mobile_App                 Debit         10000000.00         21776.31            Success         0
+  TXN000386303       2022-07-07           Cheque   Mobile_App                 Debit         10000000.00         42180.76            Success         0
+  TXN000526797       2023-10-16           Cheque          Web                 Debit         10000000.00         80694.61            Success         0
+  TXN000532758       2023-11-05           Cheque   Mobile_App                Credit         10000000.00         12230.57            Success         0
+  TXN000432562       2022-12-06             RTGS          API                Credit          9236223.15         40786.34            Success         0
+  TXN000445612       2023-01-19             RTGS          ATM                Credit          8480487.27         41937.58            Success         0
+  TXN000125738       2020-02-21           Cheque          Web                Credit          8455419.74         20124.61            Success         0
+  TXN000418682       2022-10-22           Cheque          API                 Debit          8009499.04         27540.47            Pending         0
+  TXN000423543       2022-11-07           Cheque   Mobile_App                 Debit          7923295.55        108149.04            Success         0
+  TXN000242297       2021-03-16             RTGS POS_Terminal                Credit          7899297.23          7566.34            Success         0
+03_exploratory_analysis.sql statement 20: OK, 2 row(s)
+transaction_direction  transactions  amount_exceeds_balance  pct_of_direction
+               Credit        179606                   35592             19.82
+                Debit        370394                   43902             11.85
+03_exploratory_analysis.sql statement 21: OK, 7 row(s)
+ dow_number  day_name  transactions  pct_of_transactions
+          0    Sunday         78630                14.30
+          1    Monday         78528                14.28
+          2   Tuesday         78420                14.26
+          3 Wednesday         78581                14.29
+          4  Thursday         78256                14.23
+          5    Friday         78821                14.33
+          6  Saturday         78764                14.32
+-- 03_exploratory_analysis.sql: 19 ran, 2 skipped (PG-only), 0 error(s)
+==============================================================================
+04_advanced_analytical_queries.sql statement 1: OK, 60 row(s)
+month_start  transactions  mom_transactions_pct  same_month_prev_year_transactions  yoy_transactions_pct  total_amount  mom_amount_pct  yoy_amount_pct
+ 2019-01-01          9406                   NaN                                NaN                   NaN  249535891.79             NaN             NaN
+ 2019-02-01          8220                -12.61                                NaN                   NaN  243173588.54           -2.55             NaN
+ 2019-03-01          9290                 13.02                                NaN                   NaN  260628647.43            7.18             NaN
+ 2019-04-01          8990                 -3.23                                NaN                   NaN  273646411.65            4.99             NaN
+ 2019-05-01          9425                  4.84                                NaN                   NaN  274372666.32            0.27             NaN
+ 2019-06-01          9107                 -3.37                                NaN                   NaN  265974301.92           -3.06             NaN
+ 2019-07-01          9400                  3.22                                NaN                   NaN  295934783.83           11.26             NaN
+ 2019-08-01          9524                  1.32                                NaN                   NaN  316574899.38            6.97             NaN
+... 60 rows
+04_advanced_analytical_queries.sql statement 2: OK, 15 row(s)
+ rank_by_abs_deviation        day  transactions  baseline_7d_avg  deviation_pct
+                     1 2023-11-11           373            304.1           22.6
+                     2 2022-06-26           242            305.0          -20.7
+                     3 2021-10-25           366            304.6           20.2
+                     4 2019-05-18           366            304.9           20.1
+                     5 2023-04-02           241            300.4          -19.8
+                     6 2019-09-16           341            285.7           19.3
+                     7 2023-01-08           342            288.7           18.5
+                     8 2023-03-17           248            304.0          -18.4
+                     9 2023-11-17           339            286.9           18.2
+                    10 2020-11-29           246            299.4          -17.8
+                    11 2021-06-16           260            311.3          -16.5
+                    12 2019-05-22           268            320.3          -16.3
+                    13 2020-03-24           349            300.4           16.2
+                    14 2020-03-26           262            311.1          -15.8
+                    15 2023-01-11           334            289.0           15.6
+04_advanced_analytical_queries.sql statement 3: OK, 60 row(s)
+month_start  transactions  cumulative_transactions  cumulative_pct_of_total  year_to_date_transactions  total_amount  cumulative_amount
+ 2019-01-01          9406                     9406                     1.71                       9406  249535891.79       2.495359e+08
+ 2019-02-01          8220                    17626                     3.21                      17626  243173588.54       4.927095e+08
+ 2019-03-01          9290                    26916                     4.90                      26916  260628647.43       7.533381e+08
+ 2019-04-01          8990                    35906                     6.53                      35906  273646411.65       1.026985e+09
+ 2019-05-01          9425                    45331                     8.25                      45331  274372666.32       1.301357e+09
+ 2019-06-01          9107                    54438                     9.90                      54438  265974301.92       1.567332e+09
+ 2019-07-01          9400                    63838                    11.61                      63838  295934783.83       1.863266e+09
+ 2019-08-01          9524                    73362                    13.35                      73362  316574899.38       2.179841e+09
+... 60 rows
+04_advanced_analytical_queries.sql statement 4: OK, 50 row(s)
+transaction_type  calendar_year  transactions  yoy_transactions_pct  total_amount  yoy_amount_pct  amount_rank_in_year
+  ATM_Withdrawal           2019         10938                   NaN   26760500.00             NaN                    7
+  ATM_Withdrawal           2020         11164                  2.07   26969000.00            0.78                    7
+  ATM_Withdrawal           2021         11045                 -1.07   26714500.00           -0.94                    7
+  ATM_Withdrawal           2022         11084                  0.35   26807500.00            0.35                    7
+  ATM_Withdrawal           2023         10842                 -2.18   26217000.00           -2.20                    7
+      Auto_Debit           2019          5482                   NaN   14994456.41             NaN                   10
+      Auto_Debit           2020          5456                 -0.47   14457865.31           -3.58                   10
+      Auto_Debit           2021          5480                  0.44   14763368.41            2.11                   10
+... 50 rows
+04_advanced_analytical_queries.sql statement 5: OK, 15 row(s)
+customer_id  transactions  total_amount  distinct_states  row_number_rank  rank_with_gaps  dense_rank
+ CUST003688            20     698397.14               10                1               1           1
+ CUST054493            20     280819.33               10                2               1           1
+ CUST035430            19     202187.51                7                3               3           2
+ CUST052011            19     156447.34                9                4               3           2
+ CUST061785            19      80230.75                8                5               3           2
+ CUST068276            19    1458149.90                7                6               3           2
+ CUST000646            18     272409.35                8                7               7           3
+ CUST011429            18     311492.64                9                8               7           3
+ CUST020406            18     508633.71                7                9               7           3
+ CUST023213            18    1949886.81                8               10               7           3
+ CUST023770            18     451985.13                8               11               7           3
+ CUST024441            18     471064.15                8               12               7           3
+ CUST028251            18     495975.80                6               13               7           3
+ CUST037699            18     685546.50                8               14               7           3
+ CUST038403            18     260567.05                8               15               7           3
+04_advanced_analytical_queries.sql statement 6: OK, 45 row(s)
+merchant_category  rank_in_category transaction_id transaction_date transaction_type    channel transaction_direction  transaction_amount transaction_status  is_fraud
+       E-Commerce                 1   TXN000347558       2022-03-01             RTGS Mobile_App                 Debit          6151663.89            Success         0
+       E-Commerce                 2   TXN000420841       2022-10-29           Cheque Mobile_App                 Debit          5291421.75            Success         0
+       E-Commerce                 3   TXN000278469       2021-07-14           Cheque        API                 Debit          5106492.06            Success         0
+        Education                 1   TXN000423543       2022-11-07           Cheque Mobile_App                 Debit          7923295.55            Success         0
+        Education                 2   TXN000408411       2022-09-18           Cheque Mobile_App                 Debit          4159878.75            Success         0
+        Education                 3   TXN000530315       2023-10-28             RTGS     Branch                 Debit          3529170.58            Success         0
+    Entertainment                 1   TXN000242753       2021-03-18           Cheque     Branch                 Debit          5143045.54            Success         0
+    Entertainment                 2   TXN000224055       2021-01-14             RTGS     Branch                Credit          5035851.03            Success         1
+... 45 rows
+04_advanced_analytical_queries.sql statement 7: OK, 60 row(s)
+transaction_type      channel  transactions  pct_of_type  channel_rank_in_type  success_amount  pct_of_type_success_amount
+  ATM_Withdrawal   Mobile_App         20774        37.70                     1     46585500.00                       37.90
+  ATM_Withdrawal          Web         12160        22.07                     2     27035500.00                       22.00
+  ATM_Withdrawal          ATM          6650        12.07                     3     14908000.00                       12.13
+  ATM_Withdrawal POS_Terminal          6029        10.94                     4     13382500.00                       10.89
+  ATM_Withdrawal       Branch          5553        10.08                     5     12422500.00                       10.11
+  ATM_Withdrawal          API          3940         7.15                     6      8580500.00                        6.98
+      Auto_Debit   Mobile_App         10451        38.12                     1     26148446.39                       38.48
+      Auto_Debit          Web          5905        21.54                     2     14503453.74                       21.34
+... 60 rows
+04_advanced_analytical_queries.sql statement 8: OK, 15 row(s)
+ rank_by_rate transaction_type      channel  transactions  failed  reversed  failed_or_reversed_pct  overall_pct  ci_low_pct  ci_high_pct  ratio_to_overall                                    signal
+            1           Cheque       Branch          2167     105        51                    7.20         5.99        6.18         8.36              1.20 above overall (interval excludes overall)
+            2      Net_Banking          API          2632     120        59                    6.80         5.99        5.90         7.83              1.14                   consistent with overall
+            3              POS          API          4302     184       108                    6.79         5.99        6.07         7.58              1.13 above overall (interval excludes overall)
+            4             IMPS          API          5356     244       113                    6.67         5.99        6.03         7.36              1.11 above overall (interval excludes overall)
+            5             RTGS POS_Terminal          3652     163        80                    6.65         5.99        5.89         7.51              1.11                   consistent with overall
+            6       Auto_Debit       Branch          2711     119        59                    6.57         5.99        5.69         7.56              1.10                   consistent with overall
+            7             RTGS       Branch          3322     149        68                    6.53         5.99        5.74         7.42              1.09                   consistent with overall
+            8      Credit_Card          ATM          2008      88        43                    6.52         5.99        5.52         7.69              1.09                   consistent with overall
+            9           Cheque POS_Terminal          2370     109        45                    6.50         5.99        5.57         7.56              1.09                   consistent with overall
+           10              POS       Branch          6147     275       123                    6.47         5.99        5.89         7.12              1.08                   consistent with overall
+           11             RTGS   Mobile_App         12486     537       268                    6.45         5.99        6.03         6.89              1.08 above overall (interval excludes overall)
+           12           Cheque          API          1475      64        31                    6.44         5.99        5.30         7.81              1.08                   consistent with overall
+           13             NEFT POS_Terminal          7260     311       153                    6.39         5.99        5.85         6.98              1.07                   consistent with overall
+           14             IMPS POS_Terminal          8548     371       168                    6.31         5.99        5.81         6.84              1.05                   consistent with overall
+           15              POS          ATM          7170     294       158                    6.30         5.99        5.76         6.89              1.05                   consistent with overall
+04_advanced_analytical_queries.sql statement 9: OK, 24 row(s)
+         amount_band transaction_type  transactions  fraud_labelled  label_rate_pct  band_rate_pct  ratio_to_band  ci_low_pct  ci_high_pct                    signal
+      1 under 25,000             RTGS          1064              10           0.940          0.801           1.17       0.511        1.721 consistent with band rate
+      1 under 25,000           Cheque          8897              81           0.910          0.801           1.14       0.733        1.130 consistent with band rate
+      1 under 25,000      Credit_Card         15972             137           0.858          0.801           1.07       0.726        1.013 consistent with band rate
+      1 under 25,000             NEFT         44067             371           0.842          0.801           1.05       0.761        0.932 consistent with band rate
+      1 under 25,000   ATM_Withdrawal         55106             456           0.827          0.801           1.03       0.755        0.907 consistent with band rate
+      1 under 25,000             IMPS         72988             585           0.802          0.801           1.00       0.739        0.869 consistent with band rate
+      1 under 25,000      Net_Banking         30475             245           0.804          0.801           1.00       0.710        0.911 consistent with band rate
+      1 under 25,000              POS         60142             481           0.800          0.801           1.00       0.732        0.874 consistent with band rate
+      1 under 25,000              UPI        153782            1209           0.786          0.801           0.98       0.743        0.832 consistent with band rate
+      1 under 25,000       Auto_Debit         27363             187           0.683          0.801           0.85       0.592        0.788           below band rate
+  2 25,000-99,999.99              UPI           203               2           0.985          0.806           1.22       0.271        3.521 consistent with band rate
+  2 25,000-99,999.99           Cheque          7059              67           0.949          0.806           1.18       0.748        1.204 consistent with band rate
+  2 25,000-99,999.99             IMPS          3787              35           0.924          0.806           1.15       0.665        1.283 consistent with band rate
+  2 25,000-99,999.99      Net_Banking          6568              57           0.868          0.806           1.08       0.670        1.123 consistent with band rate
+  2 25,000-99,999.99             RTGS          9306              74           0.795          0.806           0.99       0.634        0.997 consistent with band rate
+  2 25,000-99,999.99             NEFT         16516             117           0.708          0.806           0.88       0.591        0.848 consistent with band rate
+  2 25,000-99,999.99      Credit_Card           437               3           0.686          0.806           0.85       0.234        1.999 consistent with band rate
+3 100,000-999,999.99             RTGS         21414             434           2.027          1.783           1.14       1.846        2.224           above band rate
+3 100,000-999,999.99      Net_Banking          1402              24           1.712          1.783           0.96       1.153        2.535 consistent with band rate
+3 100,000-999,999.99             IMPS           263               4           1.521          1.783           0.85       0.593        3.845 consistent with band rate
+3 100,000-999,999.99           Cheque          5336              74           1.387          1.783           0.78       1.106        1.737           below band rate
+3 100,000-999,999.99             NEFT          5898              76           1.289          1.783           0.72       1.031        1.610           below band rate
+4 1,000,000 and over           Cheque           419              34           8.115          8.247           0.98       5.865       11.125 consistent with band rate
+4 1,000,000 and over             RTGS          1180              93           7.881          8.247           0.96       6.477        9.559 consistent with band rate
+04_advanced_analytical_queries.sql statement 10: OK, 10 row(s)
+ amount_decile  transactions  min_amount  max_amount  fraud_labelled  label_rate_pct  cumulative_labelled  cumulative_share_of_labelled_pct  lift_vs_overall
+             1         55000    51277.67 10000000.00             907           1.649                  907                             18.61             1.86
+             2         55000    13094.05    51277.43             467           0.849                 1374                             28.20             0.96
+             3         55000     5763.25    13093.69             410           0.745                 1784                             36.61             0.84
+             4         55000     3329.91     5763.15             422           0.767                 2206                             45.27             0.87
+             5         55000     2035.74     3329.90             470           0.855                 2676                             54.91             0.96
+             6         55000     1400.87     2035.73             461           0.838                 3137                             64.38             0.95
+             7         55000      989.06     1400.86             442           0.804                 3579                             73.45             0.91
+             8         55000      576.11      989.02             405           0.736                 3984                             81.76             0.83
+             9         55000      317.75      576.11             448           0.815                 4432                             90.95             0.92
+            10         55000        2.40      317.73             441           0.802                 4873                            100.00             0.90
+04_advanced_analytical_queries.sql statement 11: OK, 10 row(s)
+transaction_type  transactions      p25    median       p75       p95        p99      mean  mean_to_median
+            RTGS         32964 82936.42 161495.24 319545.32 849188.73 1705097.00 269254.41            1.67
+          Cheque         21711 12345.00  36442.35 107203.51 514559.87 1559541.39 130362.01            3.58
+            NEFT         66615  4874.17  13501.14  37065.33 158441.00  445823.46  41464.05            3.07
+     Net_Banking         38458  3159.05   8112.06  20484.78  80684.13  206565.73  21317.44            2.63
+            IMPS         77038  1247.41   2997.47   7243.57  25780.61   61417.64   7019.51            2.34
+     Credit_Card         16426  1078.21   2469.17   5462.78  17828.66   39238.97   5047.15            2.04
+  ATM_Withdrawal         55106  1000.00   2000.00   3000.00  10000.00   10000.00   2423.51            1.21
+      Auto_Debit         27418   983.77   1791.39   3316.23   7838.74   15229.46   2704.48            1.51
+             POS         60278   522.04   1094.30   2299.21   6577.27   14021.21   1996.46            1.82
+             UPI        153986   294.74    657.65   1484.58   4793.92   10828.18   1358.81            2.07
+04_advanced_analytical_queries.sql statement 12: OK, 6 row(s)
+     channel  labelled_transactions  other_transactions  median_labelled  median_other  median_ratio
+         API                    346               38289          3000.00       2024.39          1.48
+         ATM                    561               65616          3000.00       2006.14          1.50
+      Branch                    520               54437          2153.97       2039.08          1.06
+  Mobile_App                   1809              206559          2751.01       2041.06          1.35
+POS_Terminal                    557               60296          2899.91       2019.47          1.44
+         Web                   1080              119930          2452.39       2030.53          1.21
+04_advanced_analytical_queries.sql statement 13: OK, 58 row(s)
+month_start  transactions  failed_or_reversed  monthly_rate_pct  window_transactions  window_bad  rolling_3m_rate_pct
+ 2019-03-01          9290                 582              6.26                26916        1657                 6.16
+ 2019-04-01          8990                 564              6.27                26500        1642                 6.20
+ 2019-05-01          9425                 534              5.67                27705        1680                 6.06
+ 2019-06-01          9107                 576              6.32                27522        1674                 6.08
+ 2019-07-01          9400                 541              5.76                27932        1651                 5.91
+ 2019-08-01          9524                 562              5.90                28031        1679                 5.99
+ 2019-09-01          8877                 508              5.72                27801        1611                 5.79
+ 2019-10-01          9576                 533              5.57                27977        1603                 5.73
+... 58 rows
+04_advanced_analytical_queries.sql statement 14: OK, 10 row(s)
+ activity_group  customer_ids  min_transactions_per_id  max_transactions_per_id  transactions  pct_of_transactions  cumulative_pct  total_amount
+              1          7992                       10                       20         94222                17.13           17.13  2.737742e+09
+              2          7992                        9                       10         76477                13.90           31.04  2.327959e+09
+              3          7992                        8                        9         68277                12.41           43.45  2.072226e+09
+              4          7992                        7                        8         62542                11.37           54.82  1.901739e+09
+              5          7992                        7                        7         55944                10.17           64.99  1.628555e+09
+              6          7992                        6                        7         50507                 9.18           74.18  1.485996e+09
+              7          7991                        5                        6         46751                 8.50           82.68  1.446125e+09
+              8          7991                        5                        5         39955                 7.26           89.94  1.191188e+09
+              9          7991                        4                        5         33348                 6.06           96.00  1.012076e+09
+             10          7991                        1                        4         21977                 4.00          100.00  6.452948e+08
+04_advanced_analytical_queries.sql statement 15: OK, 1 row(s)
+ customer_ids_with_2plus_rows  state_varies  state_varies_pct  account_type_varies  account_type_varies_pct  credit_score_varies  credit_score_varies_pct  kyc_status_varies  kyc_status_varies_pct  has_loan_varies  has_loan_varies_pct  all_five_constant
+                        79337         78998             99.57                77937                    98.24                79334                    100.0              45037                  56.77            71922                90.65                  0
+04_advanced_analytical_queries.sql statement 16: OK, 3 row(s)
+                             loan_group  transactions  pct_of_all_rows  median_emi  mean_emi  median_credit_score  failed_or_reversed_pct  fraud_labelled  fraud_label_rate_pct  mean_amount
+               1 No loan (has_loan = 0)        357712            65.04        0.00      0.00                600.0                    6.01            3146                 0.879     29879.94
+       2 Loan flag set, named loan type        172866            31.43     4907.09   6774.85                600.0                    6.01            1537                 0.889     30037.34
+3 Loan flag set, loan_type None (DQ-01)         19422             3.53     4872.50   6697.62                605.0                    5.44             190                 0.978     29247.92
+04_advanced_analytical_queries.sql statement 17: OK, 1 row(s)
+ customer_ids_with_dq01_rows  also_have_named_loan_rows  also_have_no_loan_rows  only_dq01_rows
+                       17241                      15302                   17048              26
+04_advanced_analytical_queries.sql statement 18: OK, 12 row(s)
+transaction_direction         ratio_band  transactions  pct_of_direction  fraud_labelled  fraud_label_rate_pct
+               Credit        1 under 0.1         92098             51.28             703                 0.763
+               Credit 2 0.1 to under 0.5         38955             21.69             304                 0.780
+               Credit   3 0.5 to under 1         12961              7.22             109                 0.841
+               Credit     4 1 to under 2         10769              6.00              96                 0.891
+               Credit    5 2 to under 10         16397              9.13             191                 1.165
+               Credit      6 10 and over          8426              4.69             243                 2.884
+                Debit        1 under 0.1        223201             60.26            1812                 0.812
+                Debit 2 0.1 to under 0.5         82058             22.15             673                 0.820
+                Debit   3 0.5 to under 1         21230              5.73             169                 0.796
+                Debit     4 1 to under 2         14901              4.02             126                 0.846
+                Debit    5 2 to under 10         19654              5.31             217                 1.104
+                Debit      6 10 and over          9350              2.52             230                 2.460
+04_advanced_analytical_queries.sql statement 19: OK, 2 row(s)
+transaction_direction  transactions  corr_amount_balance  median_ratio  p95_ratio  p99_ratio
+               Credit        179606              -0.0034        0.0921     9.2486    47.9618
+                Debit        370394              -0.0001        0.0576     4.0106    26.8116
+04_advanced_analytical_queries.sql statement 20: OK, 1 row(s)
+ rows_checked  id_gaps  date_regressions  next_before_current  max_day_jump
+       550000        0                 0                    0             1
+04_advanced_analytical_queries.sql statement 21: OK, 6 row(s)
+          gap_bucket  transaction_pairs  pct_of_pairs
+          1 same day               1063          0.23
+          2 1-7 days              14184          3.02
+         3 8-30 days              43856          9.33
+        4 31-90 days              96021         20.43
+       5 91-365 days             224086         47.67
+6 more than 365 days              90874         19.33
+04_advanced_analytical_queries.sql statement 22: OK, 10 row(s)
+ rank_by_rate       state  transactions  fraud_labelled  label_rate_pct  overall_rate_pct  ci_low_pct  ci_high_pct  z_score                                    signal
+            1          UP         27414             260           0.948             0.886       0.840        1.070     1.10                   consistent with overall
+            2 West Bengal         43950             413           0.940             0.886       0.854        1.034     1.20                   consistent with overall
+            3   Karnataka         76659             701           0.914             0.886       0.849        0.984     0.84                   consistent with overall
+            4 Maharashtra         98911             885           0.895             0.886       0.838        0.955     0.29                   consistent with overall
+            5       Delhi         66114             588           0.889             0.886       0.821        0.964     0.09                   consistent with overall
+            6   Telangana         49610             440           0.887             0.886       0.808        0.973     0.02                   consistent with overall
+            7  Tamil Nadu         71747             633           0.882             0.886       0.816        0.953    -0.11                   consistent with overall
+            8     Gujarat         54798             482           0.880             0.886       0.805        0.961    -0.16                   consistent with overall
+            9   Rajasthan         38725             303           0.782             0.886       0.699        0.875    -2.17 below overall (interval excludes overall)
+           10      Punjab         22072             168           0.761             0.886       0.655        0.885    -1.98 below overall (interval excludes overall)
+-- 04_advanced_analytical_queries.sql: 22 ran, 0 skipped (PG-only), 0 error(s)
+==============================================================================
+05_views.sql statement 1: OK (no result set)
+05_views.sql statement 2: OK (no result set)
+05_views.sql statement 3: OK (no result set)
+05_views.sql statement 4: OK (no result set)
+05_views.sql statement 5: OK (no result set)
+05_views.sql statement 6: OK (no result set)
+-- 05_views.sql: 6 ran, 0 skipped (PG-only), 0 error(s)
+view banking_v_channel_type_summary: 60 row(s)
+view banking_v_data_quality_exceptions: 9 row(s)
+view banking_v_fraud_label_summary: 56 row(s)
+view banking_v_monthly_summary: 61 row(s)
+view banking_v_status_summary: 24 row(s)
+view banking_v_transactions_enriched: 550000 row(s)
+==============================================================================
